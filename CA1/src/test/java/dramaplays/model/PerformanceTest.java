@@ -1,6 +1,5 @@
-package model;
+package dramaplays.model;
 
-import dramaplays.model.Performance;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

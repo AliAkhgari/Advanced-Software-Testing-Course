@@ -1,4 +1,5 @@
-import dramaplays.FactorPrinter;
+package dramaplays;
+
 import dramaplays.model.Invoice;
 import dramaplays.model.Performance;
 import dramaplays.model.Play;

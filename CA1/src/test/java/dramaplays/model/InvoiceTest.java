@@ -1,7 +1,5 @@
-package model;
+package dramaplays.model;
 
-import dramaplays.model.Invoice;
-import dramaplays.model.Performance;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
