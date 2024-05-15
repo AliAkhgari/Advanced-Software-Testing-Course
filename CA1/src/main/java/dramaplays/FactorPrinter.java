@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class FactorPrinter {
 
-    public String print(dramaplays.Invoice invoice, Map<String, dramaplays.Play> plays) {
+    public String print(dramaplays.model.Invoice invoice, Map<String, dramaplays.model.Play> plays) {
         var totalAmount = 0;
         var volumeCredits = 0;
         var result = String.format("Factor for %s\n", invoice.customer);
