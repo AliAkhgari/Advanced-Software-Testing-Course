@@ -1,4 +1,4 @@
-package dramaplays.model;
+package model;
 
 import org.junit.jupiter.api.Test;
 

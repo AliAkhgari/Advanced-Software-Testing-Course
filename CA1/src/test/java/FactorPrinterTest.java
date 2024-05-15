@@ -1,8 +1,7 @@
-package dramaplays;
-
-import dramaplays.model.Invoice;
-import dramaplays.model.Performance;
-import dramaplays.model.Play;
+import dramaplays.FactorPrinter;
+import model.Invoice;
+import model.Performance;
+import model.Play;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package dramaplays.model;
+package model;
 
 public class Performance {
 
