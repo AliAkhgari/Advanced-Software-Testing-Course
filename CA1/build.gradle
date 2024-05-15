@@ -30,6 +30,6 @@ dependencies {
 }
 
 pitest {
-    targetClasses = ['dramaplays.*']
+    targetClasses = ['dramaplays.*', 'CourseSelection.*']
     junit5PluginVersion = '1.0.0'
 }
