@@ -1,0 +1,3 @@
+output of User story 3:
+All the birthdate are valid
+All the deathdate are valid

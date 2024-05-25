@@ -1,0 +1,5 @@
+User story 1
+All the birthdays are valid
+All the deathdays are valid
+All the marriages are valid
+All the divorces are valid

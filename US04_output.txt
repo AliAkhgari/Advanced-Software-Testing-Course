@@ -1,0 +1,3 @@
+Output of user story 4:
+All the marriagedays are valid
+All divorcedates are valid
