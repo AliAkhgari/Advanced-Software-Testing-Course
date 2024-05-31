@@ -7,6 +7,11 @@
     <groupId>edu.stevens.ssw555</groupId>
     <artifactId>gedcom</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <scm>
+        <connection>scm:svn:http://somerepository.com/svn_repo/trunk</connection>
+        <developerConnection>scm:svn:https://somerepository.com/svn_repo/trunk</developerConnection>
+        <url>http://somerepository.com/view.cgi</url>
+    </scm>
     <build>
         <plugins>
             <plugin>
@@ -19,6 +24,22 @@
                     <debuglevel>lines,vars,source</debuglevel>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.7.3</version>
+                <configuration>
+                    <targetClasses>
+                        <param>edu.stevens.ssw555.Gedcom_Service</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>edu.stevens.ssw555.Gedcom_ServiceTest</param>
+                    </targetTests>
+<!--                    <mutators>-->
+<!--                        <mutator>STRONGER</mutator>-->
+<!--                    </mutators>-->
                 </configuration>
             </plugin>
         </plugins>
