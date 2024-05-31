@@ -1,0 +1,21 @@
+ERROR:INDIVIDUAL: User Story US03: Birth Before Death 
+Individual: @I2@ - Bob Williams was born after death
+DOB: 10/19/1997 DOD: 05/12/1995
+
+ERROR:FAMILY: User Story US04: Marriage Before Divorce 
+Family: @F1@
+Individual: @I2@: Bob Williams@I3@: Emma Davis marriage date is before divorce date.
+Marriage Date: 07/22/1980 Divorce Date: 07/19/1975
+
+ERROR: User Story US08: Birth After Divorce Date
+Family ID: @F1@
+Individual: @I1@: Emily Williams Has been born after parents' divorce
+DOB: 04/22/1985 Parents Divorce Date: 07/19/1975
+
+
+ERROR: User Story US08: Birth Before Marriage Date 
+Family ID: @F1@
+Individual: @I5@: Emmet Williams Has been born before parents' marriage
+DOB: 05/19/1975 Parents Marriage Date: 07/22/1980
+
+
