@@ -3,32 +3,17 @@
 
 package edu.stevens.ssw555;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Gedcom_Service {
 	
 	private static HashMap<String, Family> families = new HashMap<String, Family>();
 	private static HashMap<String, Individual> individuals = new HashMap<String, Individual>();
 	private static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-	private static String fileName = null;
+	private static String fileName = "GedcomService_output.txt";;
 	private static ArrayList<Individual> dupInd = new ArrayList<Individual>();
 	private static ArrayList<Family> dupFam = new ArrayList<Family>();
 
@@ -47,9 +32,9 @@ public class Gedcom_Service {
 			//UserStory 8
 			birthbeforemarriageofparent(individuals, families);
 			//UserStory 16 
-			Malelastname(families);
+			Malelastname(families, individuals);
 			//UserStory 20
-			AuntsandUnclesname(families);
+			AuntsandUnclesname(families, individuals);
 			//UserStory 24
 			uniqueFamilynameBySpouses(individuals, families);
 
@@ -60,150 +45,123 @@ public class Gedcom_Service {
 	}
 
 	static void readAndParseFile(String fileName) throws IOException {
-		
-		String[] validTags = { "INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE",
-				"CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE" };
-		BufferedReader br = new BufferedReader(new FileReader(fileName));
-		String line = br.readLine();
-		
+		String[] validTags = {"INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"};
+		BufferedReader br = null;
 
-		while (line != null) {
-			
-			String[] parts = line.split(" ");
-			
-			if (Arrays.asList(validTags).contains(parts[1])) {
-				line = br.readLine();
-			} else {
-				if (parts[0].equals("0") && Arrays.asList(validTags).contains(parts[2])) {
-					
-					if (parts[2].equals("INDI")) {
-						Individual indi = new Individual(parts[1]);
-						String individualParts = br.readLine();
-						do {
-							String[] indParts = individualParts.split(" ");
-							if (indParts[1].equals("NAME"))
-								indi.setName(indParts[2] + " " + indParts[3].substring(1, indParts[3].length() - 1));
-							if (indParts[1].equals("SEX"))
-								indi.setSex(indParts[2]);
-							if (indParts[1].equals("FAMS"))
-								indi.setSpouseOf(indParts[2]);
-							if (indParts[1].equals("FAMC"))
-								indi.setChildOf(indParts[2]);
-							if (indParts[1].equals("BIRT")) {
-								individualParts = br.readLine();
-								indParts = individualParts.split(" ");
-								String month = getMonth(indParts[3]);
-								indi.setBirth(month + "/" + indParts[2] + "/" + indParts[4]);
+		try {
+			br = new BufferedReader(new FileReader(fileName));
+			String line = br.readLine();
+
+			while (line != null) {
+				String[] parts = line.split(" ");
+
+				if (Arrays.asList(validTags).contains(parts[1])) {
+					line = br.readLine();
+				} else {
+					if (parts[0].equals("0") && Arrays.asList(validTags).contains(parts[2])) {
+						if (parts[2].equals("INDI")) {
+							Individual indi = new Individual(parts[1]);
+							String individualParts = br.readLine();
+							try {
+								do {
+									String[] indParts = individualParts.split(" ");
+									if (indParts[1].equals("NAME"))
+										indi.setName(indParts[2] + " " + indParts[3].substring(1, indParts[3].length() - 1));
+									if (indParts[1].equals("SEX"))
+										indi.setSex(indParts[2]);
+									if (indParts[1].equals("FAMS"))
+										indi.setSpouseOf(indParts[2]);
+									if (indParts[1].equals("FAMC"))
+										indi.setChildOf(indParts[2]);
+									if (indParts[1].equals("BIRT")) {
+										individualParts = br.readLine();
+										indParts = individualParts.split(" ");
+										String month = getMonth(indParts[3]);
+										indi.setBirth(month + "/" + indParts[2] + "/" + indParts[4]);
+									}
+									if (indParts[1].equals("DEAT") && indParts[2].equals("Y")) {
+										individualParts = br.readLine();
+										indParts = individualParts.split(" ");
+										String month = getMonth(indParts[3]);
+										indi.setDeath(month + "/" + indParts[2] + "/" + indParts[4]);
+									}
+									individualParts = br.readLine();
+								} while (!individualParts.startsWith("0"));
+								line = individualParts;
+								if (!individuals.containsKey(indi.getId())) {
+									individuals.put(indi.getId(), indi);
+								} else {
+									dupInd.add(indi);
+								}
+							} catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+								throw e;
 							}
-							if (indParts[1].equals("DEAT") && indParts[2].equals("Y")) {
-								individualParts = br.readLine();
-								indParts = individualParts.split(" ");
-								String month = getMonth(indParts[3]);
-								indi.setDeath(month + "/" + indParts[2] + "/" + indParts[4]);
+						} else if (parts[2].equals("FAM")) {
+							ArrayList<String> children = new ArrayList<>();
+							Family fam = new Family(parts[1]);
+							String familyParts = br.readLine();
+							try {
+								do {
+									String[] indFamParts = familyParts.split(" ");
+									if (indFamParts[1].equals("HUSB"))
+										fam.setHusb(indFamParts[2]);
+									if (indFamParts[1].equals("WIFE"))
+										fam.setWife(indFamParts[2]);
+									if (indFamParts[1].equals("CHIL")) {
+										children.add(indFamParts[2]);
+										fam.setChild(children);
+									}
+									if (indFamParts[1].equals("MARR")) {
+										familyParts = br.readLine();
+										indFamParts = familyParts.split(" ");
+										String month = getMonth(indFamParts[3]);
+										fam.setMarriage(month + "/" + indFamParts[2] + "/" + indFamParts[4]);
+									}
+									if (indFamParts[1].equals("DIV")) {
+										familyParts = br.readLine();
+										indFamParts = familyParts.split(" ");
+										String month = getMonth(indFamParts[3]);
+										fam.setDivorce(month + "/" + indFamParts[2] + "/" + indFamParts[4]);
+									}
+									familyParts = br.readLine();
+								} while (!familyParts.startsWith("0"));
+								if (!families.containsKey(fam.getId())) {
+									families.put(fam.getId(), fam);
+								} else {
+									dupFam.add(fam);
+								}
+								line = familyParts;
+							} catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+								throw e;
 							}
-							individualParts = br.readLine();
-						} while (!individualParts.startsWith("0"));
-						line = individualParts;
-						if (!individuals.containsKey(indi.getId())) {
-							individuals.put(indi.getId(), indi);
-						} else {
-							dupInd.add(indi);
 						}
-					} else if (parts[2].equals("FAM")) {
-						ArrayList<String> children = new ArrayList<String>();
-						Family fam = new Family(parts[1]);
-						String familyParts = br.readLine();
-						do {
-							String[] indFamParts = familyParts.split(" ");
-							if (indFamParts[1].equals("HUSB"))
-								fam.setHusb(indFamParts[2]);
-							if (indFamParts[1].equals("WIFE"))
-								fam.setWife(indFamParts[2]);
-							if (indFamParts[1].equals("CHIL")) {
-								children.add(indFamParts[2]);
-								fam.setChild(children);
-							}
-							if (indFamParts[1].equals("MARR")) {
-								familyParts = br.readLine();
-								indFamParts = familyParts.split(" ");
-								String month = getMonth(indFamParts[3]);
-								fam.setMarriage(month + "/" + indFamParts[2] + "/" + indFamParts[4]);
-							}
-							if (indFamParts[1].equals("DIV")) {
-								familyParts = br.readLine();
-								indFamParts = familyParts.split(" ");
-								String month = getMonth(indFamParts[3]);
-								fam.setDivorce(month + "/" + indFamParts[2] + "/" + indFamParts[4]);
-							}
-							familyParts = br.readLine();
-						} while (!familyParts.startsWith("0"));
-						if (!families.containsKey(fam.getId())) {
-							families.put(fam.getId(), fam);
-						} else {
-							dupFam.add(fam);
-						}
-						line = familyParts;
+					} else {
+						line = br.readLine();
 					}
 				}
-				
-				else {
-					
-					line = br.readLine();
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					System.err.println("Error closing BufferedReader: " + e.getMessage());
 				}
 			}
 		}
-		
-		br.close();
 	}
 
-	/*public static void printMaps() throws FileNotFoundException, IOException {
-		
-		Map<String, Individual> indMap = new TreeMap<String, Individual>(individuals);
-		Iterator<Map.Entry<String, Individual>> indEntries = indMap.entrySet().iterator();
-		writeToFile(
-				"INDIVIDUALS");
-		System.out.println("\n");
-		while (indEntries.hasNext()) {
-			Map.Entry<String, Individual> indEntry = indEntries.next();
-			Individual ind = indEntry.getValue();
-			
-			writeToFile(indEntry.getKey() + " Name: " + ind.getName() + ", Sex: " + ind.getSex() + ", DOB: "
-					+ ind.getBirth() + ", DOD: " + ind.getDeath() + ", Spouse of: " + ind.getSpouseOf() + ", Child of: "
-					+ ind.getChildOf());
-
-		}
-		
-		
-		Map<String, Family> famMap = new TreeMap<String, Family>(families);
-		Iterator<Map.Entry<String, Family>> famEntries = famMap.entrySet().iterator();
-		writeToFile(
-				"FAMILIES");
-		System.out.println("\n");
-		while (famEntries.hasNext()) {
-			Map.Entry<String, Family> famEntry = famEntries.next();
-			Family fam = famEntry.getValue();
-			writeToFile(famEntry.getKey() + " - Husband: " + fam.getHusb() + ", Wife: " + fam.getWife() + ", Children: "
-					+ fam.getChild() + ", Marriage Date: " + fam.getMarriage() + ", Divorce Date: " + fam.getDivorce());
-			
-		}
-		System.out.println("\n");
-		
-	}*/
-
 	public static void createOutputFile() throws IOException {
-		System.out.println("Please Enter Output File Path: ");
-		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-		String fp = bufferRead.readLine();
-		Path filePath = Paths.get(fp);
-		if (Files.exists(filePath)) {
-			fileName = "GedcomService_output.txt";
-			try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, false)))) {
-			} catch (IOException e) {
-				
-			}
-		} else {
-			System.out.println("The Path You Entered Does Not Exist.Reenter path");
-			createOutputFile();
+//		System.out.println("Please Enter Output File Path: ");
+//		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+//		String fp = bufferRead.readLine();
+//		Path filePath = Paths.get(fp);
+		fileName = "GedcomService_output.txt";
+		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, false)))) {
+		} catch (IOException e) {
+
 		}
 	}
 
@@ -222,7 +180,7 @@ public class Gedcom_Service {
 	//Refactored code for method
 	
 	static void birthBeforeDeath(HashMap<String, Individual> individuals) throws FileNotFoundException, IOException {
-		
+
 		Map<String, Individual> map = new HashMap<String, Individual>(individuals);
 		Iterator<Map.Entry<String, Individual>> entries = map.entrySet().iterator();
 		while (entries.hasNext()) {
@@ -238,7 +196,7 @@ public class Gedcom_Service {
 				else
 					date_of_death = null;
 			} catch (ParseException e) {
-				
+
 				e.printStackTrace();
 			}
 			// Compare two dates
@@ -338,9 +296,9 @@ public class Gedcom_Service {
 	}
 
 //UserStory 16 Implementation
-	static void Malelastname(HashMap<String, Family> families)
+	static void Malelastname(HashMap<String, Family> families, HashMap<String, Individual> individuals)
 			throws ParseException, FileNotFoundException, IOException {
-		Map<String, Individual> map = new HashMap<String, Individual>(individuals);
+		Map<String, Individual> map = individuals;
 		Iterator<Map.Entry<String, Individual>> entries = map.entrySet().iterator();
 		Map<String, Family> famMap = new HashMap<String, Family>(families);
 		Iterator<Map.Entry<String, Family>> famEntries = famMap.entrySet().iterator();
@@ -368,6 +326,7 @@ public class Gedcom_Service {
 					Map.Entry pair = (Map.Entry) it.next();
 					lastname1 = pair.getValue().toString();
 					Iterator it2 = nameMap.entrySet().iterator();
+
 					while (it2.hasNext()) {
 						Map.Entry pair2 = (Map.Entry) it2.next();
 						lastname2 = pair2.getValue().toString();
@@ -387,7 +346,7 @@ public class Gedcom_Service {
 	}
 	
 	//UserStory 20 Implementation
-	static void AuntsandUnclesname(HashMap<String, Family> families)
+	static void AuntsandUnclesname(HashMap<String, Family> families, HashMap<String, Individual> individuals)
 			throws ParseException, FileNotFoundException, IOException {
 		
 		Map<String, Family> famMap = new HashMap<String, Family>(families);
