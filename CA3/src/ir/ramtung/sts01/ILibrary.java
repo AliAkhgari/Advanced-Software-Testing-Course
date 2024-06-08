@@ -1,7 +1,5 @@
 package ir.ramtung.sts01;
 
-import ir.ramtung.impl1.*;
-
 import java.util.List;
 
 public interface ILibrary {
