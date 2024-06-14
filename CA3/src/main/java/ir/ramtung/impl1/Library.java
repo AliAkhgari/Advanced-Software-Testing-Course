@@ -124,11 +124,16 @@ class Magazine extends Document {
         return 2;
     }
 
-    int penaltyFor(int days) {
-        if (year < 1390)
-            return days * 2000;
-        else
-            return days * 3000;
+    int penaltyFor(int days) throws ExcessiveLateDaysException {
+        if (days <= 0)
+            return 0;
+        else if (days <= 365000) {
+            if (year < 1390)
+                return days * 2000;
+            else
+                return days * 3000;
+        } else
+            throw new ExcessiveLateDaysException("The number of late days exceeds a thousand years.");
     }
 
 
