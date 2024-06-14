@@ -248,7 +248,7 @@ class Loan {
     private Document document;
     private Member member;
     private int borrowedOn;
-    private int dueDate;
+    int dueDate;
     private int timesExtended;
 }
 
