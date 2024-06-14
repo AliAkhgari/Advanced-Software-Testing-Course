@@ -96,11 +96,15 @@ class Reference extends Document {
         return 5;
     }
 
-    int penaltyFor(int days) {
+    int penaltyFor(int days) throws ExcessiveLateDaysException {
+        if (days <= 0)
+            return 0;
         if (days <= 3)
             return 3 * 5000 + days * 7000;
-        else
+        else if (days <= 356000)
             return (21 - 7) * 3000 + (days - 21) * 5000;
+        else
+            throw new ExcessiveLateDaysException("The number of late days exceeds a thousand years.");
     }
 }
 
