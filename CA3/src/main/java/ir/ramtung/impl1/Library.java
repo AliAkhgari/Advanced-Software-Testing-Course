@@ -207,6 +207,9 @@ class Loan {
     Loan(Member mem, Document doc, int date) throws InvalidArgumentEx {
         if (mem == null || doc == null)
             throw new InvalidArgumentEx("Invalid argument to loan constructor");
+        if (date < 0)
+            throw new InvalidArgumentEx("Data cannot be negative");
+
         member = mem;
         document = doc;
         timesExtended = 0;
