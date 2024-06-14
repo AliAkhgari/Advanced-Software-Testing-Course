@@ -34,6 +34,12 @@ class CannotBorrowEx extends LibraryException {
     }
 }
 
+class ExcessiveLateDaysException extends LibraryException {
+    ExcessiveLateDaysException(String message) {
+        super(message);
+    }
+}
+
 abstract class Document {
     Document(String title) throws InvalidArgumentEx {
         if (Objects.equals(title, ""))
@@ -43,7 +49,7 @@ abstract class Document {
 
     abstract int loanDuration();
 
-    abstract int penaltyFor(int days);
+    abstract int penaltyFor(int days) throws ExcessiveLateDaysException;
 
     boolean isTitled(String documentTitle) {
         return Objects.equals(title, documentTitle);
@@ -66,13 +72,17 @@ class Book extends Document {
         return 10;
     }
 
-    int penaltyFor(int days) {
-        if (days <= 7)
+    int penaltyFor(int days) throws ExcessiveLateDaysException {
+        if (days <= 0)
+            return 0;
+        else if (days <= 7)
             return days * 2000;
         else if (days <= 21)
             return 7 * 2000 + (days - 7) * 3000;
-        else
+        else if (days <= 356000)
             return 7 * 2000 + (21 - 7) * 3000 + (days - 21) * 5000;
+        else
+            throw new ExcessiveLateDaysException("The number of late days exceeds a thousand years.");
     }
 }
 
@@ -214,12 +224,12 @@ class Loan {
         timesExtended++;
     }
 
-    void return_(int now) {
+    void return_(int now) throws ExcessiveLateDaysException {
         if (now > dueDate)
             member.penalize(getPenalty(now));
     }
 
-    int getPenalty(int now) {
+    int getPenalty(int now) throws ExcessiveLateDaysException {
         if (now <= dueDate)
             return 0;
         return document.penaltyFor(now - dueDate);
@@ -300,7 +310,7 @@ public class Library implements ir.ramtung.sts01.ILibrary {
     }
 
     @Override
-    public void returnDocument(String memberName, String documentTitle) throws InvalidArgumentEx {
+    public void returnDocument(String memberName, String documentTitle) throws InvalidArgumentEx, ExcessiveLateDaysException {
         Loan loan = findLoan(memberName, documentTitle);
         if (loan == null)
             throw new InvalidArgumentEx("The document is not in member's loan");
@@ -311,7 +321,7 @@ public class Library implements ir.ramtung.sts01.ILibrary {
     }
 
     @Override
-    public int getTotalPenalty(String memberName) throws InvalidArgumentEx {
+    public int getTotalPenalty(String memberName) throws InvalidArgumentEx, ExcessiveLateDaysException {
         Member member = findMember(memberName);
         if (member == null)
             throw new InvalidArgumentEx("Cannot find member");
@@ -331,7 +341,7 @@ public class Library implements ir.ramtung.sts01.ILibrary {
     private List<Loan> loans = new ArrayList<>();
     private int now = 0;
 
-    private int currentPenalty(Member member) {
+    private int currentPenalty(Member member) throws ExcessiveLateDaysException {
         int curPenalty = 0;
         for (Loan loan : loans) {
             if (loan.isBy(member))
