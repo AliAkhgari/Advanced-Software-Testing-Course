@@ -79,7 +79,7 @@ class Book extends Document {
             return days * 2000;
         else if (days <= 21)
             return 7 * 2000 + (days - 7) * 3000;
-        else if (days <= 356000)
+        else if (days <= 365000)
             return 7 * 2000 + (21 - 7) * 3000 + (days - 21) * 5000;
         else
             throw new ExcessiveLateDaysException("The number of late days exceeds a thousand years.");
@@ -101,7 +101,7 @@ class Reference extends Document {
             return 0;
         if (days <= 3)
             return 3 * 5000 + days * 7000;
-        else if (days <= 356000)
+        else if (days <= 365000)
             return (21 - 7) * 3000 + (days - 21) * 5000;
         else
             throw new ExcessiveLateDaysException("The number of late days exceeds a thousand years.");
