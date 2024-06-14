@@ -348,7 +348,7 @@ public class Library implements ir.ramtung.sts01.ILibrary {
     private List<Member> members  =  new ArrayList<>();
     private Map<Document, Integer> documents = new HashMap<>();
     private List<Loan> loans = new ArrayList<>();
-    private int now = 0;
+    int now = 0;
 
     private int currentPenalty(Member member) throws ExcessiveLateDaysException {
         int curPenalty = 0;
